@@ -11,6 +11,6 @@ bot.on("ready", () => {
 	console.log("Logged in!");
 });
 bot.on("close", data => console.log("Connection closed: ", data));
-bot.on("pong", () => console.log("Pong!"));
-bot.on("ping", () => console.log("Ping!"));
+/*bot.on("pong", () => console.log("Pong!")); //extremely annoying
+bot.on("ping", () => console.log("Ping!"));*/
 console.log(Object.keys(bot));

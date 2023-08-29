@@ -3,9 +3,14 @@ const { EventEmitter } = require("events");
 const { join } = require("path"),
 	{ get } = require("https"),
 	{ WebSocket: ws } = require("ws"),
+	{ version } = require("./package.json"),
 	APIs = {
 		https: "https://discord.com/api/",
-		httpheader: token => ({ Authorization: "Bot " + token }),
+		httpheader: token => ({
+			Authorization: "Bot " + token,
+			"User-Agent":
+				"DiscordBot (https://github.com/Dreamnity/dx, " + version + ")",
+		}),
 		spec: "https://raw.githubusercontent.com/discord/discord-api-spec/main/specs/openapi_preview.json",
 	};
 var apiSpec;
@@ -19,6 +24,25 @@ class Dx extends EventEmitter {
 	constructor(options) {
 		super("Endpoints");
 		this.#validateLogin(options);
+		download(APIs.spec)
+			.then(text => (apiSpec = JSON.parse(text)))
+			.then(() => {
+				if (!apiSpec?.openapi)
+					throw new Error(
+						"Error downloading the API specification: No content"
+					);
+				this.interact = createInteract();
+				Object.keys(apiSpec.paths).forEach(e => {
+					let a = e.match(/\/([a-z0-9]+).*/)[1];
+					if (!(a in this)) this[a] = this.interact[a];
+				});
+				console.log(Object.keys(this));
+			})
+			.catch(e => {
+				throw new Error(
+					"Error downloading the API specification: " + e.message
+				);
+			});
 		download(join(APIs.https, "gateway")).then(result => {
 			APIs.gateway = JSON.parse(result).url;
 			//console.log('Logging in...');
@@ -50,9 +74,9 @@ class Dx extends EventEmitter {
 								if (this.#pong) {
 									this.emit("ping");
 									this.#pong = false;
-									heartbeat(
-										socket.send(JSON.stringify({ op: 1, d: this.#lastevent }))
-									);
+									heartbeat();
+									this.#pingtime = Date.now();
+									socket.send(JSON.stringify({ op: 1, d: this.#lastevent }));
 								} else {
 									socket.close();
 									this.emit("close", "Timed out!");
@@ -61,6 +85,7 @@ class Dx extends EventEmitter {
 							}, this.#heartbeat))();
 					case 11:
 						this.#pong = true;
+						this.ping = Date.now() - this.#pingtime;
 						return this.emit("pong");
 					case 1:
 					case 0:
@@ -75,32 +100,14 @@ class Dx extends EventEmitter {
 			});
 			this.#destroy = EventEmitter.destroy;
 		});
-
-		download(APIs.spec)
-			.then(text => (apiSpec = JSON.parse(text)))
-			.then(() => {
-				if (!apiSpec?.openapi)
-					throw new Error(
-						"Error downloading the API specification: No content"
-					);
-				this.interact = createInteract();
-				Object.keys(apiSpec.paths).forEach(e => {
-					let a = e.match(/\/([a-z0-9]+).*/)[1];
-					if (!(a in this)) this[a] = this.interact[a];
-				});
-				console.log(Object.keys(this));
-			})
-			.catch(e => {
-				throw new Error(
-					"Error downloading the API specification: " + e.message
-				);
-			});
 	}
 	#validateLogin(options) {
 		if (!options?.login?.token)
 			throw new ReferenceError("Token is not provided! (options.login.token)");
 	}
 	#heartbeat = 0;
+	#pingtime = 0;
+	ping = 0;
 	#lastevent = 0;
 	#pong = true;
 	/**
@@ -127,9 +134,9 @@ class Dx extends EventEmitter {
 	 */
 	socket;
 }
-function download(url) {
+function download(url, options = {}) {
 	return new Promise((r, j) =>
-		get(url, function (res) {
+		get(url, options, function (res) {
 			// Buffer the body entirely for processing as a whole.
 			var bodyChunks = [];
 			res
@@ -152,7 +159,7 @@ function download(url) {
  * @param {Object} spec Discord API OpenAPI specification
  * @returns {Proxy}
  */
-function createInteract(path = [], spec) {
+function createInteract(path = []) {
 	let pth = path.join("/");
 	async function send(options) {
 		let parsed = parse(pth, options);
@@ -180,17 +187,30 @@ function toCamelCase(str) {
  * a
  * @param {String[]} patharray a
  */
-function parse(patharray, options) {
+function parse(patharray, options = {}) {
 	let pa =
 		"/" +
 		patharray.map(e => (Number.isNaN(parseInt(e)) ? e : "variable")).join("/");
-	console.log(pa);
-	let matching = Object.keys(apiSpec.paths).find(e =>
-		e.replace(/\/\{[a-z_]+\}/g, "/variable").endsWith(pa)
-	);
-	let data = apiSpec.paths[matching];
-	console.log(matching, JSON.stringify(data));
-	let result = patharray.join("/");
-	return result;
+	let matching =
+		Object.keys(apiSpec.paths).find(e =>
+			e.replace(/\/\{[a-z_]+\}/g, "/variable").endsWith(pa)
+		) ||
+		Object.keys(apiSpec.paths).find(e =>
+			e.replace(/\/\{[a-z_]+\}/g, "").endsWith(pa)
+		);
+	if (!matching) return undefined;
+	let matchlist = matching.split("/").filter(e => e != "");
+	pa.split("/")
+		.filter(e => e != "")
+		.forEach((e, i) => {
+			if (e === "variable" && parseInt(patharray[i])) {
+				matchlist[i] = patharray[i];
+			}
+		});
+	matching = "/" + matchlist.join("/");
+	return matching
+		.split("/")
+		.map(e => options[e.match(/{(?<i>[a-zA-Z0-9_]+)}/)?.groups?.i] || e)
+		.join("/");
 }
 module.exports = Dx;
