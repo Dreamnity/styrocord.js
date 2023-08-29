@@ -1,0 +1,19 @@
+{
+	"name": "dx",
+	"version": "1.0.0",
+	"description": "Discord.js but Proxy-based(Feather-weight)",
+	"main": "index.js",
+	"scripts": {
+		"test": "nodemon test"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"ws": "^8.13.0"
+	},
+	"devDependencies": {
+		"eslint": "^8.47.0",
+		"nodemon": "3.0.1"
+	}
+}
