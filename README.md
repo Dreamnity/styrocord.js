@@ -1,4 +1,4 @@
-# dx
- Discord.js but Proxy-based
+# Feathercord.js
+i guess the name tell how light it is
 
 Still in alpha
