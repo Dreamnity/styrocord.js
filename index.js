@@ -103,7 +103,9 @@ class Styrofoam extends EventEmitter {
 	#validateLogin(options) {
 		if (!options?.login?.token)
 			throw new ReferenceError("Token is not provided! (options.login.token)");
+		this.#token=options.login.token;
 	}
+	#token = '';
 	#heartbeat = 0;
 	#pingtime = 0;
 	ping = 0;
