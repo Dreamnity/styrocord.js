@@ -31,7 +31,7 @@ class Styrofoam extends EventEmitter {
 					throw new Error(
 						"Error downloading the API specification: No content"
 					);
-				this.interact = createInteract();
+				this.interact = this.#createInteract();
 				Object.keys(apiSpec.paths).forEach(e => {
 					let a = e.match(/\/([a-z0-9]+).*/)[1];
 					if (!(a in this)) this[a] = this.interact[a];
@@ -103,9 +103,9 @@ class Styrofoam extends EventEmitter {
 	#validateLogin(options) {
 		if (!options?.login?.token)
 			throw new ReferenceError("Token is not provided! (options.login.token)");
-		this.#token=options.login.token;
+		this.#token = options.login.token;
 	}
-	#token = '';
+	#token = "";
 	#heartbeat = 0;
 	#pingtime = 0;
 	ping = 0;
@@ -115,6 +115,32 @@ class Styrofoam extends EventEmitter {
 	 * @type {Proxy}
 	 */
 	interact;
+	/**
+	 * Create a proxy that interact with discord api
+	 * @param {String[]} path Chaining path to api
+	 * @param {Object} spec Discord API OpenAPI specification
+	 * @returns {Proxy}
+	 */
+	#createInteract(path = []) {
+		let pth = path.join("/");
+		let token = this.#token;
+		async function send(options) {
+			let parsed = parse(pth, options);
+			if (!parsed)
+				throw new Error(
+					"Endpoint not found (trying to search for " + pth + ")"
+				);
+			request(new URL(pth, APIs.https), {
+				headers: APIs.httpheader(token),
+				method: "POST",
+			});
+		}
+		return new Proxy(send, {
+			get(t, p) {
+				return this.#createInteract(path.concat(...p.split(/[./]/)));
+			},
+		});
+	}
 	/**
 	 * Log out the bot
 	 */
@@ -153,25 +179,6 @@ function download(url, options = {}) {
 				.on("error", j);
 		}).on("error", j)
 	);
-}
-/**
- * Create a proxy that interact with discord api
- * @param {String[]} path Chaining path to api
- * @param {Object} spec Discord API OpenAPI specification
- * @returns {Proxy}
- */
-function createInteract(path = []) {
-	let pth = path.join("/");
-	async function send(options) {
-		let parsed = parse(pth, options);
-		if (!parsed) throw new Error('Endpoint not found (trying to search for ' + pth + ')');
-		request(new URL(pth,APIs.https),{headers:APIs.httpheader,method:'POST'})
-	}
-	return new Proxy(send, {
-		get(t, p) {
-			return createInteract(path.concat(...p.split(/[./]/)));
-		},
-	});
 }
 function toCamelCase(str) {
 	return str
