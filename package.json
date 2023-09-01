@@ -6,8 +6,8 @@
 	"scripts": {
 		"test": "nodemon test"
 	},
-	"keywords": [],
-	"author": "",
+	"keywords": ["wrapper","Discord API","discord","lightweight","discord.js"],
+	"author": "superdinmc",
 	"license": "ISC",
 	"dependencies": {
 		"ws": "^8.13.0"
