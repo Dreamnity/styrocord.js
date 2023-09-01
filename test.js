@@ -1,5 +1,5 @@
-const dx = require("./index");
-const bot = new dx({
+const styro = require("./index");
+const bot = new styro({
 	login: {
 		token: require("./token.json"),
 	},
