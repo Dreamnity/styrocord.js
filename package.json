@@ -1,5 +1,5 @@
 {
-	"name": "dx",
+	"name": "feathercord.js",
 	"version": "1.0.0",
 	"description": "Discord.js but Proxy-based(Feather-weight)",
 	"main": "index.js",
