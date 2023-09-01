@@ -1,7 +1,7 @@
 const { EventEmitter } = require("events");
 
 const { join } = require("path"),
-	{ get } = require("https"),
+	{ get,request } = require("https"),
 	{ WebSocket: ws } = require("ws"),
 	{ version } = require("./package.json"),
 	APIs = {
@@ -9,12 +9,12 @@ const { join } = require("path"),
 		httpheader: token => ({
 			Authorization: "Bot " + token,
 			"User-Agent":
-				"DiscordBot (https://github.com/Dreamnity/dx, " + version + ")",
+				"DiscordBot (https://github.com/Dreamnity/styrofoam.js, " + version + ")",
 		}),
 		spec: "https://raw.githubusercontent.com/discord/discord-api-spec/main/specs/openapi_preview.json",
 	};
 var apiSpec;
-class Dx extends EventEmitter {
+class Styrofoam extends EventEmitter {
 	/**
 	 * Discord.js but proxy
 	 * @param {Object} options Options
@@ -36,7 +36,6 @@ class Dx extends EventEmitter {
 					let a = e.match(/\/([a-z0-9]+).*/)[1];
 					if (!(a in this)) this[a] = this.interact[a];
 				});
-				console.log(Object.keys(this));
 			})
 			.catch(e => {
 				throw new Error(
@@ -163,6 +162,8 @@ function createInteract(path = []) {
 	let pth = path.join("/");
 	async function send(options) {
 		let parsed = parse(pth, options);
+		if (!parsed) throw new Error('Endpoint not found (trying to search for ' + pth + ')');
+		request(new URL(pth,APIs.https),{headers:APIs.httpheader,method:'POST'})
 	}
 	return new Proxy(send, {
 		get(t, p) {
@@ -213,4 +214,4 @@ function parse(patharray, options = {}) {
 		.map(e => options[e.match(/{(?<i>[a-zA-Z0-9_]+)}/)?.groups?.i] || e)
 		.join("/");
 }
-module.exports = Dx;
+module.exports = Styrofoam;
