@@ -1,17 +1,19 @@
-const { EventEmitter } = require("events");
+const { EventEmitter } = require('events');
 
-const { join } = require("path"),
-	{ get,request } = require("https"),
-	{ WebSocket: ws } = require("ws"),
-	{ version } = require("./package.json"),
+const { join } = require('path'),
+	{ get, request } = require('https'),
+	{ WebSocket: ws } = require('ws'),
+	{ version } = require('./package.json'),
 	APIs = {
-		https: "https://discord.com/api/",
+		https: 'https://discord.com/api/',
 		httpheader: token => ({
-			Authorization: "Bot " + token,
-			"User-Agent":
-				"DiscordBot (https://github.com/Dreamnity/styrofoam.js, " + version + ")",
+			Authorization: 'Bot ' + token,
+			'User-Agent':
+				'DiscordBot (https://github.com/Dreamnity/styrofoam.js, ' +
+				version +
+				')',
 		}),
-		spec: "https://raw.githubusercontent.com/discord/discord-api-spec/main/specs/openapi_preview.json",
+		spec: 'https://raw.githubusercontent.com/discord/discord-api-spec/main/specs/openapi_preview.json',
 	};
 var apiSpec;
 class Styrofoam extends EventEmitter {
@@ -22,14 +24,14 @@ class Styrofoam extends EventEmitter {
 	 * @param {String} options.login.token Bot token
 	 */
 	constructor(options) {
-		super("Endpoints");
+		super('Endpoints');
 		this.#validateLogin(options);
 		download(APIs.spec)
 			.then(text => (apiSpec = JSON.parse(text)))
 			.then(() => {
 				if (!apiSpec?.openapi)
 					throw new Error(
-						"Error downloading the API specification: No content"
+						'Error downloading the API specification: No content'
 					);
 				this.interact = this.#createInteract();
 				Object.keys(apiSpec.paths).forEach(e => {
@@ -39,13 +41,13 @@ class Styrofoam extends EventEmitter {
 			})
 			.catch(e => {
 				throw new Error(
-					"Error downloading the API specification: " + e.message
+					'Error downloading the API specification: ' + e.message
 				);
 			});
-		download(join(APIs.https, "gateway")).then(result => {
+		download(join(APIs.https, 'gateway')).then(result => {
 			APIs.gateway = JSON.parse(result).url;
 			//console.log('Logging in...');
-			this.socket = new ws(APIs.gateway).on("message", r => {
+			this.socket = new ws(APIs.gateway).on('message', r => {
 				let socket = this.socket;
 				let data = JSON.parse(r),
 					heartbeat;
@@ -59,7 +61,7 @@ class Styrofoam extends EventEmitter {
 								d: {
 									properties: {
 										os: process.platform,
-										browser: "dx.js",
+										browser: 'dx.js',
 										device: process.arch,
 									},
 									intents: 513,
@@ -71,30 +73,30 @@ class Styrofoam extends EventEmitter {
 							setTimeout(() => {
 								if (this.#heartbeat == 0) return;
 								if (this.#pong) {
-									this.emit("ping");
+									this.emit('ping');
 									this.#pong = false;
 									heartbeat();
 									this.#pingtime = Date.now();
 									socket.send(JSON.stringify({ op: 1, d: this.#lastevent }));
 								} else {
 									socket.close();
-									this.emit("close", "Timed out!");
+									this.emit('close', 'Timed out!');
 									this.#heartbeat = 0;
 								}
 							}, this.#heartbeat))();
 					case 11:
 						this.#pong = true;
 						this.ping = Date.now() - this.#pingtime;
-						return this.emit("pong");
+						return this.emit('pong');
 					case 1:
 					case 0:
-						this.emit(toCamelCase(data.t.replace(/_/g, " ")), data.d);
+						this.emit(toCamelCase(data.t.replace(/_/g, ' ')), data.d);
 				}
 				this.#lastevent = data.s || this.#lastevent;
 			});
-			this.socket.on("close", data => {
+			this.socket.on('close', data => {
 				if (data == 1005) return;
-				this.emit("close", data);
+				this.emit('close', data);
 				this.#heartbeat = 0;
 			});
 			this.#destroy = EventEmitter.destroy;
@@ -102,10 +104,10 @@ class Styrofoam extends EventEmitter {
 	}
 	#validateLogin(options) {
 		if (!options?.login?.token)
-			throw new ReferenceError("Token is not provided! (options.login.token)");
+			throw new ReferenceError('Token is not provided! (options.login.token)');
 		this.#token = options.login.token;
 	}
-	#token = "";
+	#token = '';
 	#heartbeat = 0;
 	#pingtime = 0;
 	ping = 0;
@@ -122,18 +124,22 @@ class Styrofoam extends EventEmitter {
 	 * @returns {Proxy}
 	 */
 	#createInteract(path = []) {
-		let pth = path.join("/");
+		let pth = path.join('/');
 		let token = this.#token;
 		async function send(options) {
 			let parsed = parse(pth, options);
 			if (!parsed)
 				throw new Error(
-					"Endpoint not found (trying to search for " + pth + ")"
+					'Endpoint not found (trying to search for ' + pth + ')'
 				);
-			request(new URL(pth, APIs.https), {
-				headers: APIs.httpheader(token),
-				method: "POST",
-			});
+			request(
+				new URL(pth, APIs.https),
+				{
+					headers: APIs.httpheader(token),
+					method: 'POST',
+				},
+				res => {}
+			);
 		}
 		return new Proxy(send, {
 			get(t, p) {
@@ -154,6 +160,49 @@ class Styrofoam extends EventEmitter {
 			return false;
 		}
 	}
+	/**
+	 * Fr
+	 * @param {Object} activity Activity information
+	 * @param {String} activity.name Activity's name
+	 * @param {Number} activity.type https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-types
+	 * @param {String|undefined} activity.state User's current party status, or text used for a custom status
+	 * @param {String|undefined} activity.url Stream URL, is validated when type is 1
+	 */
+	setPresence(activity) {
+		this.#currentPresense.activity=activity;
+		this.socket.send(
+			JSON.stringify({
+				op: 3,
+				d: {
+					since: null,
+					activities: [activity],
+					status: this.#currentPresense.status,
+					afk: false,
+				},
+			})
+		);
+	}
+	/**
+	 * 
+	 * @param {'online'|'dnd'|'idle'|'invisible'|'offline'} status 
+	 */
+	setStatus(status) {
+		let validator = ['online','dnd','idle','invisible','offline'];
+		if (!validator.includes(status)) throw new TypeError('Status must be one of ' + validator.join(', '));
+		this.#currentPresense.status=status;
+		this.socket.send(
+			JSON.stringify({
+				op: 3,
+				d: {
+					since: null,
+					activities: [this.#currentPresense.activity],
+					status: status,
+					afk: false,
+				},
+			})
+		);
+	}
+	#currentPresense = { status: 'online', activity: {} };
 	//EventEmitter's destroy
 	#destroy;
 	/**
@@ -167,22 +216,22 @@ function download(url, options = {}) {
 			// Buffer the body entirely for processing as a whole.
 			var bodyChunks = [];
 			res
-				.on("data", function (chunk) {
+				.on('data', function (chunk) {
 					// You can process streamed parts here...
 					bodyChunks.push(chunk);
 				})
-				.on("end", function () {
+				.on('end', function () {
 					var body = Buffer.concat(bodyChunks);
 					r(body);
 					// ...and/or process the entire body here.
 				})
-				.on("error", j);
-		}).on("error", j)
+				.on('error', j);
+		}).on('error', j)
 	);
 }
 function toCamelCase(str) {
 	return str
-		.split(" ")
+		.split(' ')
 		.map(function (word, index) {
 			// If it is the first word make sure to lowercase all the chars.
 			if (index == 0) {
@@ -191,7 +240,7 @@ function toCamelCase(str) {
 			// If it is not the first word only upper case the first char and lowercase the rest.
 			return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 		})
-		.join("");
+		.join('');
 }
 /**
  * a
@@ -199,28 +248,28 @@ function toCamelCase(str) {
  */
 function parse(patharray, options = {}) {
 	let pa =
-		"/" +
-		patharray.map(e => (Number.isNaN(parseInt(e)) ? e : "variable")).join("/");
+		'/' +
+		patharray.map(e => (Number.isNaN(parseInt(e)) ? e : 'variable')).join('/');
 	let matching =
 		Object.keys(apiSpec.paths).find(e =>
-			e.replace(/\/\{[a-z_]+\}/g, "/variable").endsWith(pa)
+			e.replace(/\/\{[a-z_]+\}/g, '/variable').endsWith(pa)
 		) ||
 		Object.keys(apiSpec.paths).find(e =>
-			e.replace(/\/\{[a-z_]+\}/g, "").endsWith(pa)
+			e.replace(/\/\{[a-z_]+\}/g, '').endsWith(pa)
 		);
 	if (!matching) return undefined;
-	let matchlist = matching.split("/").filter(e => e != "");
-	pa.split("/")
-		.filter(e => e != "")
+	let matchlist = matching.split('/').filter(e => e != '');
+	pa.split('/')
+		.filter(e => e != '')
 		.forEach((e, i) => {
-			if (e === "variable" && parseInt(patharray[i])) {
+			if (e === 'variable' && parseInt(patharray[i])) {
 				matchlist[i] = patharray[i];
 			}
 		});
-	matching = "/" + matchlist.join("/");
+	matching = '/' + matchlist.join('/');
 	return matching
-		.split("/")
+		.split('/')
 		.map(e => options[e.match(/{(?<i>[a-zA-Z0-9_]+)}/)?.groups?.i] || e)
-		.join("/");
+		.join('/');
 }
 module.exports = Styrofoam;
