@@ -25,6 +25,7 @@ class Styrofoam extends EventEmitter {
 	 */
 	constructor(options) {
 		super('Endpoints');
+		this.options = options
 		this.#validateLogin(options);
 		download(APIs.spec)
 			.then(text => (apiSpec = JSON.parse(text)))
@@ -95,6 +96,7 @@ class Styrofoam extends EventEmitter {
 			},
 		});
 	}
+	options = {};
 	/**
 	 * Login to the bot
 	 * @param {Object} option Login option
@@ -110,47 +112,50 @@ class Styrofoam extends EventEmitter {
 				case 10:
 					this.#heartbeat = data.d.heartbeat_interval;
 					socket.send(
-						JSON.stringify(customLogin||{
-							op: 2,
-							d: {
-								properties: {
-									os: process.platform,
-									browser: 'dx.js',
-									device: process.arch,
+						JSON.stringify(
+							customLogin || {
+								op: 2,
+								d: {
+									properties: {
+										os: process.platform,
+										browser: "dx.js",
+										device: process.arch,
+									},
+									intents: 513,
+									...this.options.login,
 								},
-								intents: 513,
-								...options.login,
-							},
-						})
+							}
+						)
 					);
 					return (heartbeat = () => {
 						const timeout = setTimeout(() => {
 							if (this.#heartbeat == 0) return;
 							if (this.#pong) {
-								this.emit('ping');
+								this.emit("ping");
 								this.#pong = false;
 								heartbeat();
 								this.#pingtime = Date.now();
 								socket.send(JSON.stringify({ op: 1, d: this.#lastevent }));
 							} else {
 								socket.close();
-								this.emit('close', 'Timed out!');
+								this.emit("close", "Timed out!");
 								this.#heartbeat = 0;
 							}
 						}, this.#heartbeat);
-						this.on('close', () => clearTimeout(timeout));
+						this.on("close", () => clearTimeout(timeout));
 					})();
 				case 11:
 					this.#pong = true;
 					this.ping = Date.now() - this.#pingtime;
-					return this.emit('pong');
+					return this.emit("pong");
 				case 1:
-					if(data.d) this.session = data.d;
+					if (data.d) this.session = data.d;
+				// eslint-disable-next-line no-fallthrough
 				case 0:
-					return this.emit(toCamelCase(data.t.replace(/_/g, ' ')), data.d);
+					return this.emit(toCamelCase(data.t.replace(/_/g, " ")), data.d);
 				case 7:
 				case 9:
-					this.emit('disconnected', data.d);
+					this.emit("disconnected", data.d);
 					if (data.d || data.op == 7) {
 						this.login({
 							customLogin: {
@@ -160,14 +165,15 @@ class Styrofoam extends EventEmitter {
 									session_id: this.session.session_id,
 									seq: this.#lastevent,
 								},
-							},gateway:this.session.resume_gateway_url
-						})
+							},
+							gateway: this.session.resume_gateway_url,
+						});
 					} else {
 						this.emit(
-							'error',
-							new Error('Gateway issued disconnection without resume')
+							"error",
+							new Error("Gateway issued disconnection without resume")
 						);
-						this.emit('close', 'Connection closed by gateway!');
+						this.emit("close", "Connection closed by gateway!");
 						this.destroy();
 					}
 			}
@@ -214,7 +220,7 @@ class Styrofoam extends EventEmitter {
 				})
 	}
 	#send(data) {
-		return new Promise(r =>
+		return new Promise((r,j) =>
 			this.socket.send(
 				typeof data==='string'?data:JSON.stringify(data),
 				e => (e ? j(e) : r())
