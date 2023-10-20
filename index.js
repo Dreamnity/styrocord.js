@@ -118,7 +118,7 @@ class Styrofoam extends EventEmitter {
 								d: {
 									properties: {
 										os: process.platform,
-										browser: "dx.js",
+										browser: "styrofoam.js",
 										device: process.arch,
 									},
 									intents: 513,
