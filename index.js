@@ -34,7 +34,7 @@ class Styrofoam extends EventEmitter {
 					throw new Error(
 						'Error downloading the API specification: No content'
 					);
-				this.interact = this.#createInteract();
+				this.interact = this.createInteract();
 				Object.keys(apiSpec.paths).forEach(e => {
 					let a = e.match(/\/([a-z0-9]+).*/)[1];
 					if (!(a in this)) this[a] = this.interact[a];
@@ -72,7 +72,7 @@ class Styrofoam extends EventEmitter {
 	 * @param {Object} spec Discord API OpenAPI specification
 	 * @returns {Proxy}
 	 */
-	#createInteract(path = []) {
+	createInteract(path = []) {
 		let pth = path.join('/');
 		let token = this.#token;
 		async function send(options) {
@@ -92,7 +92,7 @@ class Styrofoam extends EventEmitter {
 		}
 		return new Proxy(send, {
 			get(t, p) {
-				return this.#createInteract(path.concat(...p.split(/[./]/)));
+				return this.createInteract(path.concat(...p.split(/[./]/)));
 			},
 		});
 	}
