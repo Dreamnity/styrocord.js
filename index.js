@@ -91,7 +91,17 @@ class Styrofoam extends EventEmitter {
 					},
 					res => {
 						var chunks = '';
-						res.on('data',e=>chunks+=e)
+						res.on('data', e => chunks += e)
+						res.on('end', () => {
+							const data = JSON.parse(chunks);
+							if (!res.statusCode.toString().startsWith('2')&&data.message) {
+								const err = new Error(data.message);
+								err.name = 'DiscordAPIError';
+								err.code = data.code;
+								
+								reject(err);
+							}
+						})
 					}
 				);
 			});
@@ -320,7 +330,7 @@ function parse(patharray, options = {}) {
 		"/" +
 		patharray
 			.map(e =>
-				Number.isNaN(parseInt(e)) && !e.match(/\{.+\}/g) ? e : "variable"
+				Number.isNaN(parseInt(e)) && !e.match(/\{[a-z_]+\}/g) ? e : "variable"
 			)
 			.join("/");
 	let matching =
