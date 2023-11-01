@@ -84,10 +84,10 @@ class Styrofoam extends EventEmitter {
 				);
 			return new Promise(function (resolve, reject) {
 				request(
-					new URL(pth, APIs.https),
+					new URL(parsed.url, APIs.https),
 					{
 						headers: APIs.httpheader(token),
-						method: "POST",
+						method: parsed.method||"POST",
 					},
 					res => {
 						var chunks = '';
@@ -98,9 +98,9 @@ class Styrofoam extends EventEmitter {
 								const err = new Error(data.message);
 								err.name = 'DiscordAPIError';
 								err.code = data.code;
-								
-								reject(err);
+								return reject(err);
 							}
+							resolve(data);
 						})
 					}
 				);
@@ -321,11 +321,20 @@ function toCamelCase(str) {
 		})
 		.join('');
 }
+const methods = {
+	'get': 'GET',
+	'create': 'POST',
+	'post': 'POST',
+	'delete': 'DELETE',
+}
 /**
  * a
  * @param {String[]} patharray a
+ * @returns {{url: string,method?: string}}
  */
 function parse(patharray, options = {}) {
+	let method = methods[patharray[patharray.length - 1].toLowerCase()];
+	if(method) patharray = patharray.slice(0,-1);
 	let pa =
 		"/" +
 		patharray
@@ -350,9 +359,12 @@ function parse(patharray, options = {}) {
 			}
 		});
 	matching = "/" + matchlist.join("/");
-	return matching
-		.split("/")
-		.map(e => options[e.match(/{(?<i>[a-zA-Z0-9_]+)}/)?.groups?.i] || e)
-		.join("/");
+	return {
+		method: method||Object.keys(apiSpec.paths[matching])[0].toUpperCase(),
+		url: matching
+			.split("/")
+			.map(e => options[e.match(/{(?<i>[a-zA-Z0-9_]+)}/)?.groups?.i] || e)
+			.join("/")
+	}
 }
 module.exports = Styrofoam;
