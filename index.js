@@ -27,6 +27,7 @@ class Styrofoam extends EventEmitter {
 		super('Endpoints');
 		this.options = options
 		this.#validateLogin(options);
+		const outerThis = this;
 		download(APIs.spec)
 			.then(text => (apiSpec = JSON.parse(text)))
 			.then(() => {
@@ -34,7 +35,7 @@ class Styrofoam extends EventEmitter {
 					throw new Error(
 						'Error downloading the API specification: No content'
 					);
-				this.interact = this.createInteract();
+				outerThis.interact = outerThis.createInteract();
 				Object.keys(apiSpec.paths).forEach(e => {
 					let a = e.match(/\/([a-z0-9]+).*/)[1];
 					if (!(a in this)) this[a] = this.interact[a];
@@ -75,7 +76,27 @@ class Styrofoam extends EventEmitter {
 	createInteract(path = []) {
 		let pth = path.join('/');
 		let token = this.#token;
-		async function send(options) {
+		function send(options) {
+			let parsed = parse(pth, options);
+			if (!parsed)
+				throw new Error(
+					"Endpoint not found (trying to search for " + pth.join("/") + ")"
+				);
+			return new Promise(function (resolve, reject) {
+				request(
+					new URL(pth, APIs.https),
+					{
+						headers: APIs.httpheader(token),
+						method: "POST",
+					},
+					res => {
+						var chunks = '';
+						res.on('data',e=>chunks+=e)
+					}
+				);
+			});
+		}
+		/*async function send(options) {
 			let parsed = parse(pth, options);
 			if (!parsed)
 				throw new Error(
@@ -89,7 +110,7 @@ class Styrofoam extends EventEmitter {
 				},
 				res => {}
 			);
-		}
+		}*/
 		return new Proxy(send, {
 			get(t, p) {
 				return this.createInteract(path.concat(...p.split(/[./]/)));
@@ -101,7 +122,8 @@ class Styrofoam extends EventEmitter {
 	 * Login to the bot
 	 * @param {Object} option Login option
 	 */
-	login({ gateway,customLogin }) {
+	login(config) {
+		const { gateway,customLogin } = config||{};
 		if(this.socket) this.socket.close();
 		this.socket = new ws(gateway || APIs.gateway).on('message', r => {
 			let socket = this.socket;
@@ -179,6 +201,8 @@ class Styrofoam extends EventEmitter {
 			}
 			this.#lastevent = data.s || this.#lastevent;
 		});
+		let int = setInterval(() => { }, 100000);
+		this.on("close", () => clearInterval(int));
 		this.socket.on('close', data => {
 			if (data == 1005) return;
 			this.emit('close', data);
@@ -293,28 +317,32 @@ function toCamelCase(str) {
  */
 function parse(patharray, options = {}) {
 	let pa =
-		'/' +
-		patharray.map(e => (Number.isNaN(parseInt(e)) ? e : 'variable')).join('/');
+		"/" +
+		patharray
+			.map(e =>
+				Number.isNaN(parseInt(e)) && !e.match(/\{.+\}/g) ? e : "variable"
+			)
+			.join("/");
 	let matching =
 		Object.keys(apiSpec.paths).find(e =>
-			e.replace(/\/\{[a-z_]+\}/g, '/variable').endsWith(pa)
+			e.replace(/\/\{[a-z_]+\}/g, "/variable").endsWith(pa)
 		) ||
 		Object.keys(apiSpec.paths).find(e =>
-			e.replace(/\/\{[a-z_]+\}/g, '').endsWith(pa)
+			e.replace(/\/\{[a-z_]+\}/g, "").endsWith(pa)
 		);
 	if (!matching) return undefined;
-	let matchlist = matching.split('/').filter(e => e != '');
-	pa.split('/')
-		.filter(e => e != '')
+	let matchlist = matching.split("/").filter(e => e != "");
+	pa.split("/")
+		.filter(e => e != "")
 		.forEach((e, i) => {
-			if (e === 'variable' && parseInt(patharray[i])) {
+			if (e === "variable" && parseInt(patharray[i])) {
 				matchlist[i] = patharray[i];
 			}
 		});
-	matching = '/' + matchlist.join('/');
+	matching = "/" + matchlist.join("/");
 	return matching
-		.split('/')
+		.split("/")
 		.map(e => options[e.match(/{(?<i>[a-zA-Z0-9_]+)}/)?.groups?.i] || e)
-		.join('/');
+		.join("/");
 }
 module.exports = Styrofoam;
