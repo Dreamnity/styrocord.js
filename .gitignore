@@ -133,3 +133,7 @@ pnpm-lock.yaml
 
 # secret
 token.json
+
+# testing
+test_*.js
+openapi_preview.json
