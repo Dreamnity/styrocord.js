@@ -27,26 +27,27 @@ class Styrofoam extends EventEmitter {
 		super('Endpoints');
 		this.options = options
 		this.#validateLogin(options);
-		const outerThis = this;
-		download(APIs.spec)
+		this.#specPromise = download(APIs.spec)
 			.then(text => (apiSpec = JSON.parse(text)))
 			.then(() => {
 				if (!apiSpec?.openapi)
 					throw new Error(
 						'Error downloading the API specification: No content'
 					);
-				outerThis.interact = outerThis.createInteract();
+					this.interact = createInteract([],options.login.token)
 				Object.keys(apiSpec.paths).forEach(e => {
 					let a = e.match(/\/([a-z0-9]+).*/)[1];
 					if (!(a in this)) this[a] = this.interact[a];
 				});
 			})
 			.catch(e => {
-				throw new Error(
+				const err = new Error(
 					'Error downloading the API specification: ' + e.message
 				);
+				err.stack = e.stack
+				throw err;
 			});
-		download(join(APIs.https, 'gateway')).then(result => {
+		download(join(APIs.https, "gateway")).then(result => {
 			APIs.gateway = JSON.parse(result).url;
 			this.login();
 		});
@@ -56,6 +57,7 @@ class Styrofoam extends EventEmitter {
 			throw new ReferenceError('Token is not provided! (options.login.token)');
 		this.#token = options.login.token;
 	}
+	#specPromise;
 	session = {};
 	#token = '';
 	#heartbeat = 0;
@@ -63,70 +65,11 @@ class Styrofoam extends EventEmitter {
 	ping = 0;
 	#lastevent = 0;
 	#pong = true;
+	cache = { guilds: [] };
 	/**
 	 * @type {Proxy}
 	 */
 	interact;
-	/**
-	 * Create a proxy that interact with discord api
-	 * @param {String[]} path Chaining path to api
-	 * @param {Object} spec Discord API OpenAPI specification
-	 * @returns {Proxy}
-	 */
-	createInteract(path = []) {
-		let pth = path.join('/');
-		let token = this.#token;
-		function send(options) {
-			let parsed = parse(pth, options);
-			if (!parsed)
-				throw new Error(
-					"Endpoint not found (trying to search for " + pth.join("/") + ")"
-				);
-			return new Promise(function (resolve, reject) {
-				request(
-					new URL(parsed.url, APIs.https),
-					{
-						headers: APIs.httpheader(token),
-						method: parsed.method||"POST",
-					},
-					res => {
-						var chunks = '';
-						res.on('data', e => chunks += e)
-						res.on('end', () => {
-							const data = JSON.parse(chunks);
-							if (!res.statusCode.toString().startsWith('2')&&data.message) {
-								const err = new Error(data.message);
-								err.name = 'DiscordAPIError';
-								err.code = data.code;
-								return reject(err);
-							}
-							resolve(data);
-						})
-					}
-				);
-			});
-		}
-		/*async function send(options) {
-			let parsed = parse(pth, options);
-			if (!parsed)
-				throw new Error(
-					'Endpoint not found (trying to search for ' + pth + ')'
-				);
-			request(
-				new URL(pth, APIs.https),
-				{
-					headers: APIs.httpheader(token),
-					method: 'POST',
-				},
-				res => {}
-			);
-		}*/
-		return new Proxy(send, {
-			get(t, p) {
-				return this.createInteract(path.concat(...p.split(/[./]/)));
-			},
-		});
-	}
 	options = {};
 	/**
 	 * Login to the bot
@@ -134,12 +77,12 @@ class Styrofoam extends EventEmitter {
 	 */
 	login(config) {
 		const { gateway,customLogin } = config||{};
-		if(this.socket) this.socket.close();
+		if (this.socket) this.socket.close();
 		this.socket = new ws(gateway || APIs.gateway).on('message', r => {
 			let socket = this.socket;
 			let data = JSON.parse(r),
 				heartbeat;
-			//console.log(data);
+			this.emit('gatewayDebug',data);
 			switch (data.op) {
 				case 10:
 					this.#heartbeat = data.d.heartbeat_interval;
@@ -184,6 +127,8 @@ class Styrofoam extends EventEmitter {
 					if (data.d) this.session = data.d;
 				// eslint-disable-next-line no-fallthrough
 				case 0:
+					if(data.t==='GUILD_CREATE'&&this.ping==0) return this.cache.guilds.push(data.d);
+					if(data.t==='READY') return this.#specPromise.finally(()=>this.emit('ready',data.d));
 					return this.emit(toCamelCase(data.t.replace(/_/g, " ")), data.d);
 				case 7:
 				case 9:
@@ -218,6 +163,7 @@ class Styrofoam extends EventEmitter {
 			this.emit('close', data);
 			this.#heartbeat = 0;
 		});
+		this.socket.on('error', e => { throw new Error('Discord gateway socket error: '+e.message)})
 		this.#destroy = EventEmitter.destroy;
 	}
 	/**
@@ -333,38 +279,100 @@ const methods = {
  * @returns {{url: string,method?: string}}
  */
 function parse(patharray, options = {}) {
-	let method = methods[patharray[patharray.length - 1].toLowerCase()];
-	if(method) patharray = patharray.slice(0,-1);
-	let pa =
-		"/" +
-		patharray
-			.map(e =>
-				Number.isNaN(parseInt(e)) && !e.match(/\{[a-z_]+\}/g) ? e : "variable"
-			)
-			.join("/");
-	let matching =
-		Object.keys(apiSpec.paths).find(e =>
-			e.replace(/\/\{[a-z_]+\}/g, "/variable").endsWith(pa)
-		) ||
-		Object.keys(apiSpec.paths).find(e =>
-			e.replace(/\/\{[a-z_]+\}/g, "").endsWith(pa)
-		);
-	if (!matching) return undefined;
-	let matchlist = matching.split("/").filter(e => e != "");
-	pa.split("/")
-		.filter(e => e != "")
-		.forEach((e, i) => {
-			if (e === "variable" && parseInt(patharray[i])) {
-				matchlist[i] = patharray[i];
-			}
-		});
-	matching = "/" + matchlist.join("/");
-	return {
-		method: method||Object.keys(apiSpec.paths[matching])[0].toUpperCase(),
-		url: matching
-			.split("/")
-			.map(e => options[e.match(/{(?<i>[a-zA-Z0-9_]+)}/)?.groups?.i] || e)
-			.join("/")
-	}
+	try {
+		let method = methods[patharray[patharray.length - 1].toLowerCase()];
+		if (method) patharray = patharray.slice(0, -1);
+		let pa =
+			"/" +
+			patharray
+				.map(e =>
+					Number.isNaN(parseInt(e)) && !e.match(/\{[a-z_]+\}/g) ? e : "variable"
+				)
+				.join("/");
+		let matching =
+			Object.keys(apiSpec.paths).find(e =>
+				e.replace(/\/\{[a-z_]+\}/g, "/variable").endsWith(pa)
+			) ||
+			Object.keys(apiSpec.paths).find(e =>
+				e.replace(/\/\{[a-z_]+\}/g, "").endsWith(pa)
+			);
+		if (!matching) return undefined;
+		let matchlist = matching.split("/").filter(e => e != "");
+		pa.split("/")
+			.filter(e => e != "")
+			.forEach((e, i) => {
+				if (e === "variable" && parseInt(patharray[i])) {
+					matchlist[i] = patharray[i];
+				}
+			});
+		let original = matching;
+		matching = "/" + matchlist.join("/");
+		return {
+			method: method || Object.keys(apiSpec.paths[original])[0].toUpperCase(),
+			url: matching
+				.split("/")
+				.map(e => options[e.match(/{(?<i>[a-zA-Z0-9_]+)}/)?.groups?.i] || e)
+				.join("/")
+		}
+	} catch { return undefined }
 }
+	/**
+	 * Create a proxy that interact with discord api
+	 * @param {String[]} path Chaining path to api
+	 * @param {Object} spec Discord API OpenAPI specification
+	 * @returns {Proxy}
+	 */
+	function createInteract(path = [],token) {
+		let pth = path.join('/');
+		function send(options) {
+			let parsed = parse(path, options);
+			if (!parsed)
+				throw new Error(
+					"Endpoint not found (trying to search for " + pth + ")"
+				);
+			return new Promise(function (resolve, reject) {
+				request(
+					new URL(parsed.url, APIs.https),
+					{
+						headers: APIs.httpheader(token),
+						method: parsed.method||"POST",
+					},
+					res => {
+						var chunks = '';
+						res.on('data', e => chunks += e)
+						res.on('end', () => {
+							const data = JSON.parse(chunks);
+							if (!res.statusCode.toString().startsWith('2')&&data.message) {
+								const err = new Error(data.message);
+								err.name = 'DiscordAPIError';
+								err.code = data.code;
+								return reject(err);
+							}
+							resolve(data);
+						})
+					}
+				);
+			});
+		}
+		/*async function send(options) {
+			let parsed = parse(pth, options);
+			if (!parsed)
+				throw new Error(
+					'Endpoint not found (trying to search for ' + pth + ')'
+				);
+			request(
+				new URL(pth, APIs.https),
+				{
+					headers: APIs.httpheader(token),
+					method: 'POST',
+				},
+				res => {}
+			);
+		}*/
+		return new Proxy(send, {
+			get(t, p) {
+				return createInteract(path.concat(...p.split(/[./]/)),token);
+			},
+		});
+	}
 module.exports = Styrofoam;
