@@ -1,19 +1,17 @@
 {
 	"name": "styrofoam.js",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Discord.js but as light as a styrofoam",
+	"type": "commonjs",
 	"main": "index.js",
 	"scripts": {
 		"test": "nodemon test"
 	},
-	"keywords": [],
-	"author": "",
+	"homepage": "https://styrofoam.dreamnity.in",
+	"keywords": ["discord","discord api","discord.js","wrapper","styrofoam","javascript"],
+	"author": "superdinmc",
 	"license": "ISC",
 	"dependencies": {
-		"ws": "^8.13.0"
-	},
-	"devDependencies": {
-		"browserify": "^17.0.0",
-		"tinyify": "^4.0.0"
+		"ws": "^8.x"
 	}
 }
