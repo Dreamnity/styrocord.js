@@ -9,9 +9,10 @@ bot.on("messageCreate", msg =>
 );
 bot.on("ready",async () => {
 	console.log("Logged in!");
-	console.log(await bot.users["793391165688119357"]());
+	bot.users["793391165688119357"].create().then(console.log,console.error)
 });
 bot.on("close", data => console.log("Connection closed: ", data));
+bot.on('error',console.error);
 /*bot.on("pong", () => console.log("Pong!")); //extremely annoying
 bot.on("ping", () => console.log("Ping!"));*/
 console.log(Object.keys(bot));

@@ -12,6 +12,7 @@ const { join } = require('path'),
 				'DiscordBot (https://github.com/Dreamnity/styrofoam.js, ' +
 				version +
 				')',
+				'Content-Type':'application/json'
 		}),
 		spec: 'https://raw.githubusercontent.com/discord/discord-api-spec/main/specs/openapi_preview.json',
 	};
@@ -117,7 +118,9 @@ class Styrofoam extends EventEmitter {
 								this.#heartbeat = 0;
 							}
 						}, this.#heartbeat);
-						this.on("close", () => clearTimeout(timeout));
+						let cleanupFn = () => clearTimeout(timeout);
+						this.removeListener('close',cleanupFn);
+						this.on("close", cleanupFn);
 					})();
 				case 11:
 					this.#pong = true;
@@ -308,7 +311,7 @@ function parse(patharray, options = {}) {
 		let original = matching;
 		matching = "/" + matchlist.join("/");
 		return {
-			method: method || Object.keys(apiSpec.paths[original])[0].toUpperCase(),
+			method: method || Object.keys(apiSpec.paths[original]).find(e=>!!apiSpec?.paths[original][e]?.operationId).toUpperCase(),
 			url: matching
 				.split("/")
 				.map(e => options[e.match(/{(?<i>[a-zA-Z0-9_]+)}/)?.groups?.i] || e)
@@ -332,7 +335,7 @@ function parse(patharray, options = {}) {
 				);
 			return new Promise(function (resolve, reject) {
 				request(
-					new URL(parsed.url, APIs.https),
+					new URL('/api'+parsed.url, APIs.https),
 					{
 						headers: APIs.httpheader(token),
 						method: parsed.method||"POST",
@@ -341,6 +344,7 @@ function parse(patharray, options = {}) {
 						var chunks = '';
 						res.on('data', e => chunks += e)
 						res.on('end', () => {
+							if(!chunks.match(/^[\[\{]/g)) reject('DiscordAPIError: Server didn\'t respond in JSON:\n'+chunks);
 							const data = JSON.parse(chunks);
 							if (!res.statusCode.toString().startsWith('2')&&data.message) {
 								const err = new Error(data.message);
@@ -349,9 +353,9 @@ function parse(patharray, options = {}) {
 								return reject(err);
 							}
 							resolve(data);
-						})
+						}).on('error',reject);
 					}
-				);
+				).end(JSON.stringify(options)).on('error',reject);
 			});
 		}
 		/*async function send(options) {

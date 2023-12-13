@@ -11,5 +11,9 @@
 	"license": "ISC",
 	"dependencies": {
 		"ws": "^8.13.0"
+	},
+	"devDependencies": {
+		"browserify": "^17.0.0",
+		"tinyify": "^4.0.0"
 	}
 }
