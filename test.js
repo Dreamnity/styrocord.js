@@ -1,7 +1,7 @@
 const styro = require("./index");
 const bot = new styro({
 	login: {
-		token: require("./token.json"),
+		token: require("./token.json"), //ignored from git
 	},
 });
 bot.on("messageCreate", msg =>
@@ -9,7 +9,7 @@ bot.on("messageCreate", msg =>
 );
 bot.on("ready",async () => {
 	console.log("Logged in!");
-	bot.users["793391165688119357"].create().then(console.log,console.error)
+	bot.users["793391165688119357"]().then(console.log,console.error)
 });
 bot.on("close", data => console.log("Connection closed: ", data));
 bot.on('error',console.error);
