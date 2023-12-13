@@ -15,4 +15,3 @@ bot.on("close", data => console.log("Connection closed: ", data));
 bot.on('error',console.error);
 /*bot.on("pong", () => console.log("Pong!")); //extremely annoying
 bot.on("ping", () => console.log("Ping!"));*/
-console.log(Object.keys(bot));
