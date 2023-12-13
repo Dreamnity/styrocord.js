@@ -3,4 +3,6 @@ i guess the name tell how light it is, and it is also very dynamic with the disc
 
 Still in alpha
 
+update: this is kinda dead
+
 ## This has a lot of skill issues, ikr. 💀
