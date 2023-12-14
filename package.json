@@ -5,7 +5,7 @@
 	"type": "commonjs",
 	"main": "index.js",
 	"scripts": {
-		"test": "nodemon test"
+		"test": "node ."
 	},
 	"homepage": "https://styrofoam.dreamnity.in",
 	"keywords": ["discord","discord api","discord.js","wrapper","styrofoam","javascript"],
