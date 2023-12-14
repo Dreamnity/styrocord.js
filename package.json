@@ -1,13 +1,13 @@
 {
 	"name": "styrofoam.js",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "Discord.js but as light as a styrofoam",
 	"type": "commonjs",
 	"main": "index.js",
 	"scripts": {
 		"test": "node ."
 	},
-	"homepage": "https://styrofoam.dreamnity.in",
+	"homepage": "https://dreamnity.in/styrofoam.js",
 	"keywords": ["discord","discord api","discord.js","wrapper","styrofoam","javascript"],
 	"author": "superdinmc",
 	"license": "ISC",
