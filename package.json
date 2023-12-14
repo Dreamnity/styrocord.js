@@ -1,6 +1,6 @@
 {
 	"name": "styrofoam.js",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Discord.js but as light as a styrofoam",
 	"type": "commonjs",
 	"main": "index.js",
@@ -13,8 +13,5 @@
 	"license": "ISC",
 	"dependencies": {
 		"ws": "^8.x"
-	},
-	"publishConfig": {
-		"registry": "https://npm.pkg.github.com"
-	  }
+	}
 }
