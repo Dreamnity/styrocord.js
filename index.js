@@ -104,7 +104,7 @@ class Styrofoam extends EventEmitter {
 						)
 					);
 					return (heartbeat = () => {
-						const timeout = setTimeout(() => {
+						this.#hbtimeout = setTimeout(() => {
 							if (this.#heartbeat == 0) return;
 							if (this.#pong) {
 								this.emit("ping");
@@ -118,9 +118,6 @@ class Styrofoam extends EventEmitter {
 								this.#heartbeat = 0;
 							}
 						}, this.#heartbeat);
-						let cleanupFn = () => clearTimeout(timeout);
-						this.removeListener('close',cleanupFn);
-						this.on("close", cleanupFn);
 					})();
 				case 11:
 					this.#pong = true;
@@ -159,6 +156,8 @@ class Styrofoam extends EventEmitter {
 			}
 			this.#lastevent = data.s || this.#lastevent;
 		});
+		let cleanupFn = () => clearTimeout(timeout);
+		this.on("close", cleanupFn);
 		let int = setInterval(() => { }, 100000);
 		this.on("close", () => clearInterval(int));
 		this.socket.on('close', data => {
@@ -202,6 +201,7 @@ class Styrofoam extends EventEmitter {
 					},
 				})
 	}
+	#hbtimeout;
 	#send(data) {
 		return new Promise((r,j) =>
 			this.socket.send(
@@ -292,13 +292,20 @@ function parse(patharray, options = {}) {
 					Number.isNaN(parseInt(e)) && !e.match(/\{[a-z_]+\}/g) ? e : "variable"
 				)
 				.join("/");
-		let matching =
+				console.log(pa)
+		var matching =
 			Object.keys(apiSpec.paths).find(e =>
 				e.replace(/\/\{[a-z_]+\}/g, "/variable").endsWith(pa)
 			) ||
 			Object.keys(apiSpec.paths).find(e =>
 				e.replace(/\/\{[a-z_]+\}/g, "").endsWith(pa)
-			);
+			)
+			if(!matching) {
+				let pa2 = pa.replace(/\/variable/g, "");
+				matching = Object.keys(apiSpec.paths).find(e =>
+					e.replace(/\/\{[a-z_]+\}/g, "").endsWith(pa2)
+				);
+			}
 		if (!matching) return undefined;
 		let matchlist = matching.split("/").filter(e => e != "");
 		pa.split("/")
@@ -329,10 +336,14 @@ function parse(patharray, options = {}) {
 		let pth = path.join('/');
 		function send(options) {
 			let parsed = parse(path, options);
+			console.log(parsed)
 			if (!parsed)
 				throw new Error(
 					"Endpoint not found (trying to search for " + pth + ")"
 				);
+			if(m=parsed.url.match(/\/\{([a-z_]+)\}/)) throw new Error(
+				'Missing "'+m[1]+'" parameter'
+			)
 			return new Promise(function (resolve, reject) {
 				request(
 					new URL('/api'+parsed.url, APIs.https),

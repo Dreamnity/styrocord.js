@@ -10,6 +10,7 @@ bot.on("messageCreate", msg =>
 bot.on("ready",async () => {
 	console.log("Logged in!");
 	bot.users["793391165688119357"]().then(console.log,console.error)
+	console.log(await bot.channels.messages({channel_id:'876349051854028852',message_id:'1184417026853306410'}))
 });
 bot.on("close", data => console.log("Connection closed: ", data));
 bot.on('error',console.error);
