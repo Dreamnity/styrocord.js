@@ -18,7 +18,7 @@ permissions:
   contents: write
 
 jobs:
-  test:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +30,3 @@ jobs:
           # Force-update a branch instead of using a tag.
           # Default: false
           force-branch: true
-
-      - name: Run tests
-        run: deno test -A
