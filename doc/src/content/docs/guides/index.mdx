@@ -1,0 +1,112 @@
+---
+title: Getting started
+description: Guide for getting started on styrofoam.js
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Installation
+
+To install the package, install using your desired package manager
+
+<Tabs>
+<TabItem label="npm">
+
+```sh
+npm install styrofoam.js
+```
+
+</TabItem>
+<TabItem label="pnpm">
+
+```sh
+pnpm install styrofoam.js
+```
+
+</TabItem>
+<TabItem label="Yarn">
+
+```sh
+yarn install styrofoam.js
+```
+
+</TabItem>
+<TabItem label="Bun">
+
+```sh
+bun install styrofoam.js
+```
+
+</TabItem>
+</Tabs>
+
+## Creating a simple bot
+
+1. Require the library
+```js
+// index.js
+const Styro = require('styrofoam.js');
+```
+2. Initiating the bot
+```diff lang="js"
+const Styro = require('styrofoam.js');
+
++ const bot = new Styro({
++     login: {
++         token: 'BOT_TOKEN'
++     }
++ });
+```
+3. Create `ready` events
+```diff lang="js"
+const Styro = require('styrofoam.js');
+
+const bot = new Styro({
+    login: {
+        token: 'BOT_TOKEN'
+    }
+});
++ bot.on("ready",async () => {
++     bot.users["@me"]().then(me=>
++ 	    console.log("Logged in as "+me.username+"!")
++ 	)
++ });
+```
+4. Create a basic `!ping` command
+```diff lang="js"
+const Styro = require('styrofoam.js');
+
+const bot = new Styro({
+    login: {
+        token: 'BOT_TOKEN'
+    }
+});
+bot.on("ready",async () => {
+    bot.users["@me"]().then(me=>
+	    console.log("Logged in as "+me.username+"!")
+	)
+});
++ bot.on("messageCreate", async msg =>
++     if(msg.content.startsWith('!ping'))
++ 	    return bot.channels[msg.channel.id].messages.create('Pong!')
++ );
+```
+5. Voila! now you have a working discord bot made with styrofoam.js!
+```diff lang="js"
+const Styro = require('styrofoam.js');
+
+const bot = new Styro({
+    login: {
+        token: 'BOT_TOKEN'
+    }
+});
+bot.on("ready",async () => {
+    bot.users["@me"]().then(me=>
+	    console.log("Logged in as "+me.username+"!")
+	)
+});
+bot.on("messageCreate", async msg =>
+    if(msg.content.startsWith('!ping'))
+	    return bot.channels[msg.channel.id].messages.create('Pong!')
+);
+```

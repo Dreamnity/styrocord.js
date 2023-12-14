@@ -3,13 +3,15 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
+	site: 'https://dreamnity.in/styrofoam.js',
 	integrations: [
 		starlight({
-			title: 'My Docs',
+			title: 'Styrofoam.js',
 			social: {
-				github: 'https://github.com/withastro/starlight',
+				github: 'https://github.com/dreamnity/styrofoam.js',
+				discord: 'https://discord.dreamnity.in'
 			},
-			sidebar: [
+			/*sidebar: [
 				{
 					label: 'Guides',
 					items: [
@@ -21,7 +23,13 @@ export default defineConfig({
 					label: 'Reference',
 					autogenerate: { directory: 'reference' },
 				},
-			],
+			],*/
+			logo: {
+				src: './src/assets/3409147304.png',
+			},
+			editLink: {
+				baseUrl: 'https://github.com/dreamnity/styrofoam.js/edit/main/doc/',
+			},
 		}),
 	],
 });

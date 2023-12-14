@@ -1,36 +1,86 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
+title: Styrofoam.js
+description: Lightweight Discord API wrapper!
 template: splash
 hero:
-  tagline: Congrats on setting up a new Starlight project!
+  tagline: A Discord API wrapper within 11KB and a single dependency!
   image:
-    file: ../../assets/houston.webp
+    file: ../../assets/3409147304.png
   actions:
-    - text: Example Guide
-      link: /guides/example/
+    - text: Get started right away
+      link: /guides/
       icon: right-arrow
       variant: primary
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
+    - text: Package on npmjs
+      link: https://npmjs.com/styrofoam.js
       icon: external
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, Tabs, TabItem } from '@astrojs/starlight/components';
 
-## Next steps
+## Get started
 
 <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
+	<Card title="Installation" icon="down-caret">
+	    Installation is as easy as
+        <Tabs>
+			<TabItem label="npm">
+
+			```sh
+			npm install styrofoam.js
+			```
+
+			</TabItem>
+			<TabItem label="pnpm">
+
+			```sh
+			pnpm install styrofoam.js
+			```
+
+			</TabItem>
+			<TabItem label="Yarn">
+
+			```sh
+			yarn install styrofoam.js
+			```
+
+			</TabItem>
+			<TabItem label="Bun">
+
+			```sh
+			bun install styrofoam.js
+			```
+
+			</TabItem>
+		</Tabs>
+		and can go as fast as 2 seconds
 	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
+	<Card title="Start coding" icon="laptop">
+	    Creating a new bot is as simple as
+		```js
+		const styro = require("./index");
+        const bot = new styro({
+	        login: {
+		        token: 'TOKEN',
+	        },
+        });
+        bot.on("messageCreate", async msg =>
+	        if(msg.content.startsWith('!ping'))
+			    return bot.channels[msg.channel.id].messages.create('Pong!')
+        );
+        bot.on("ready",async () => {
+	        bot.users["@me"]().then(me=>
+			    console.log("Logged in as "+me.username+"!")
+			)
+        });
+        bot.on("close", data => console.log("Connection closed: ", data));
+        bot.on('error',console.error);
+		```
 	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
+	<Card title="Similar syntax to Discord API itself" icon="setting">
+		Because styrofoam.js is built to be the middleman between javascript and Discord API, It's syntax is directly same to Discord API
 	</Card>
 	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
+		Learn more in [the docs](/guides/).
 	</Card>
 </CardGrid>
