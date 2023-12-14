@@ -137,3 +137,4 @@ token.json
 # testing
 test_*.js
 openapi_preview.json
+cachedSpec.json

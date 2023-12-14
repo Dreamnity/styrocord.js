@@ -2,6 +2,7 @@ const { EventEmitter } = require('events');
 
 const { join } = require('path'),
 	{ get, request } = require('https'),
+	{ readFile,stat,writeFile } = require('fs/promises'),
 	{ WebSocket: ws } = require('ws'),
 	{ version } = require('./package.json'),
 	APIs = {
@@ -28,7 +29,7 @@ class Styrofoam extends EventEmitter {
 		super('Endpoints');
 		this.options = options
 		this.#validateLogin(options);
-		this.#specPromise = download(APIs.spec)
+		this.#specPromise = this.#downloadSpec()
 			.then(text => (apiSpec = JSON.parse(text)))
 			.then(() => {
 				if (!apiSpec?.openapi)
@@ -167,6 +168,15 @@ class Styrofoam extends EventEmitter {
 		});
 		this.socket.on('error', e => { throw new Error('Discord gateway socket error: '+e.message)})
 		this.#destroy = EventEmitter.destroy;
+	}
+	async #downloadSpec() {
+		const cache='./cachedSpec.json';
+		try {
+			if((await stat(cache)).birthtimeMs < new Date(Date.now()-8.64e+7)) throw '';
+			return await (readFile(cache).then(e=>e.toString()));
+		} catch {
+			return await download(APIs.spec).then(e=>{writeFile(cache,JSON.stringify(JSON.parse(e)));return e});
+		}
 	}
 	/**
 	 * Log out the bot
