@@ -13,5 +13,8 @@
 	"license": "ISC",
 	"dependencies": {
 		"ws": "^8.x"
-	}
+	},
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com"
+	  }
 }
