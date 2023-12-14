@@ -302,7 +302,6 @@ function parse(patharray, options = {}) {
 					Number.isNaN(parseInt(e)) && !e.match(/\{[a-z_]+\}/g) ? e : "variable"
 				)
 				.join("/");
-				console.log(pa)
 		var matching =
 			Object.keys(apiSpec.paths).find(e =>
 				e.replace(/\/\{[a-z_]+\}/g, "/variable").endsWith(pa)
@@ -346,7 +345,6 @@ function parse(patharray, options = {}) {
 		let pth = path.join('/');
 		function send(options) {
 			let parsed = parse(path, options);
-			console.log(parsed)
 			if (!parsed)
 				throw new Error(
 					"Endpoint not found (trying to search for " + pth + ")"
