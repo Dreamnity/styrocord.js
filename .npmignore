@@ -1,0 +1,8 @@
+doc/
+.vscode/
+.github/
+.eslintrc.js
+.gitattributes
+.gitignore
+.gitpod.yml
+minified.js
