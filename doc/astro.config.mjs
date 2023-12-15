@@ -6,6 +6,7 @@ export default defineConfig({
 	site: 'https://dreamnity.in/styrofoam.js',
 	integrations: [
 		starlight({
+			favicon: './src/assets/3409147304.png',
 			title: 'Styrofoam.js',
 			social: {
 				github: 'https://github.com/dreamnity/styrofoam.js',
