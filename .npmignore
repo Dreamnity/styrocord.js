@@ -6,3 +6,5 @@ doc/
 .gitignore
 .gitpod.yml
 minified.js
+minifier.js
+test.js
