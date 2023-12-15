@@ -27,6 +27,8 @@ jobs:
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
+      - run: node minifier.js
+      - run: cp minified.js index.js
       - run: npm ci
       - run: npm publish
         env:
