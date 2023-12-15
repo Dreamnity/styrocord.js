@@ -285,6 +285,10 @@ const methods = {
 	'create': 'POST',
 	'post': 'POST',
 	'delete': 'DELETE',
+	'edit': 'PATCH',
+	'patch': 'PATCH',
+	'add': 'PUT',
+	'put': 'PUT',
 }
 /**
  * a
