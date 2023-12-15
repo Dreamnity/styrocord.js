@@ -1,6 +1,6 @@
 {
 	"name": "styrofoam.js",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Discord.js but as light as a styrofoam",
 	"type": "commonjs",
 	"main": "index.js",
