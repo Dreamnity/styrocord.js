@@ -3,7 +3,7 @@ const { EventEmitter } = require('events');
 const { join } = require('path'),
 	{ get, request } = require('https'),
 	{ readFile,stat,writeFile } = require('fs/promises'),
-	{ WebSocket: ws } = require('ws'),
+	{ WebSocket: ws } = require('./ws'),
 	{ version } = require('./package.json'),
 	APIs = {
 		https: 'https://discord.com/api/',
