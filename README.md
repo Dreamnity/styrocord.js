@@ -1,4 +1,4 @@
-# styrofoam.js
+# styrocord.js
 i guess the name tell how light it is, and it is also very dynamic with the discord api, since it read the api specification right from discord's repo.
 
 Still in beta
@@ -12,7 +12,7 @@ Usage will come later
 Here's a simple bot template i used for test ^-^
 
 ```js
-const styro = require("./index");
+const styro = require("styrocord.js");
 const bot = new styro({
 	login: {
 		token: 'TOKEN',

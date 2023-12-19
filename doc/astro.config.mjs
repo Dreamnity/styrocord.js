@@ -3,13 +3,13 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://dreamnity.in/styrofoam.js',
+	site: 'https://dreamnity.in/styrocord.js',
 	integrations: [
 		starlight({
 			favicon: './src/assets/3409147304.png',
-			title: 'Styrofoam.js',
+			title: 'Styrocord.js',
 			social: {
-				github: 'https://github.com/dreamnity/styrofoam.js',
+				github: 'https://github.com/dreamnity/styrocord.js',
 				discord: 'https://discord.dreamnity.in'
 			},
 			/*sidebar: [
@@ -29,7 +29,7 @@ export default defineConfig({
 				src: './src/assets/3409147304.png',
 			},
 			editLink: {
-				baseUrl: 'https://github.com/dreamnity/styrofoam.js/edit/main/doc/',
+				baseUrl: 'https://github.com/dreamnity/styrocord.js/edit/main/doc/',
 			},
 		}),
 	],

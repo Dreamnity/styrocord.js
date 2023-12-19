@@ -10,7 +10,7 @@ const { join } = require('path'),
 		httpheader: token => ({
 			Authorization: 'Bot ' + token,
 			'User-Agent':
-				'DiscordBot (https://github.com/Dreamnity/styrofoam.js, ' +
+				'DiscordBot (https://github.com/Dreamnity/styrocord.js, ' +
 				version +
 				')',
 				'Content-Type':'application/json'
@@ -18,7 +18,7 @@ const { join } = require('path'),
 		spec: 'https://raw.githubusercontent.com/discord/discord-api-spec/main/specs/openapi_preview.json',
 	};
 var apiSpec;
-class Styrofoam extends EventEmitter {
+class Styrocord extends EventEmitter {
 	/**
 	 * Discord.js but proxy
 	 * @param {Object} options Options
@@ -95,7 +95,7 @@ class Styrofoam extends EventEmitter {
 								d: {
 									properties: {
 										os: process.platform,
-										browser: "styrofoam.js",
+										browser: "styrocord.js",
 										device: process.arch,
 									},
 									intents: 513,
@@ -402,4 +402,4 @@ function parse(patharray, options = {}) {
 			},
 		});
 	}
-module.exports = Styrofoam;
+module.exports = Styrocord;
