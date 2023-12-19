@@ -6,7 +6,7 @@ export default defineConfig({
 	site: 'https://dreamnity.in/styrocord.js',
 	integrations: [
 		starlight({
-			favicon: './src/assets/3409147304.png',
+			favicon: './public/favicon.ico',
 			title: 'Styrocord.js',
 			social: {
 				github: 'https://github.com/dreamnity/styrocord.js',
