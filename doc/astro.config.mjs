@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import starlightDocSearch from '@astrojs/starlight-docsearch';
 
 // https://astro.build/config
 export default defineConfig({
@@ -11,6 +12,8 @@ export default defineConfig({
 				github: 'https://github.com/dreamnity/styrocord.js',
 				discord: 'https://discord.dreamnity.in'
 			},
+			pagefind: true,
+			description: 'Lightweight Discord API wrapper(50Kb!)',
 			/*sidebar: [
 				{
 					label: 'Guides',
@@ -30,6 +33,13 @@ export default defineConfig({
 			editLink: {
 				baseUrl: 'https://github.com/dreamnity/styrocord.js/edit/main/doc/',
 			},
+			plugins: [
+				/*starlightDocSearch({
+					appId: 'YOUR_APP_ID',
+					apiKey: 'YOUR_SEARCH_API_KEY',
+					indexName: 'YOUR_INDEX_NAME',
+				}),*/
+			],
 		}),
 	],
 });
