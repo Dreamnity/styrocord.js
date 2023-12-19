@@ -298,7 +298,7 @@ const methods = {
 function parse(patharray, options = {}) {
 	try {
 		let method = methods[patharray[patharray.length - 1].toLowerCase()];
-		if (method) patharray = patharray.slice(0, -1);
+		if (method) patharray = patharray[0]==='/'?patharray.slice(0, -1):patharray;
 		let pa =
 			"/" +
 			patharray
@@ -369,7 +369,10 @@ function parse(patharray, options = {}) {
 						res.on('end', () => {
 							if(!chunks.match(/^[\[\{]/g)) reject('DiscordAPIError: Server didn\'t respond in JSON:\n'+chunks);
 							const data = JSON.parse(chunks);
-							if (!res.statusCode.toString().startsWith('2')&&data.message) {
+							if (res.statusCode===429&&data.retry_after) {
+								return setTimeout(()=>send(options).then(resolve,reject),data.retry_after)
+							}
+							else if (!res.statusCode.toString().startsWith('2')&&data.message) {
 								const err = new Error(data.message);
 								err.name = 'DiscordAPIError';
 								err.code = data.code;
