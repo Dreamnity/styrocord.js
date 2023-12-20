@@ -345,7 +345,7 @@ function parse(patharray, options = {}) {
 	 * @param {Object} spec Discord API OpenAPI specification
 	 * @returns {Proxy}
 	 */
-	function createInteract(path = [],token) {
+	function createInteract(path = [],token = {}) {
 		let pth = path.join('/');
 		function send(options) {
 			let parsed = parse(path, options);
@@ -384,25 +384,18 @@ function parse(patharray, options = {}) {
 				).end(JSON.stringify(options)).on('error',reject);
 			});
 		}
-		/*async function send(options) {
-			let parsed = parse(pth, options);
-			if (!parsed)
-				throw new Error(
-					'Endpoint not found (trying to search for ' + pth + ')'
-				);
-			request(
-				new URL(pth, APIs.https),
-				{
-					headers: APIs.httpheader(token),
-					method: 'POST',
-				},
-				res => {}
-			);
-		}*/
 		return new Proxy(send, {
 			get(t, p) {
 				return createInteract(path.concat(...p.split(/[./]/)),token);
 			},
+			set(t,p,n) {
+				path.push(...p.split(/[./]/),'edit')
+				return send(n)
+			},
+			deleteProperty(t,p) {
+				path.push(...p.split(/[./]/),'delete')
+				return send();
+			}
 		});
 	}
 module.exports = Styrocord;
