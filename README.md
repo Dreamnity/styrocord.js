@@ -7,7 +7,7 @@ event names is similar to discord.js
 
 and for API, just follow discord API documentation but replace / with .
 
-Usage will come later
+## [Official website](https://dreamnity.in/styrocord.js)
 
 Here's a simple bot template i used for test ^-^
 
