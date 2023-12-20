@@ -10,7 +10,7 @@ const { join } = require('path'),
 		httpheader: token => ({
 			Authorization: 'Bot ' + token,
 			'User-Agent':
-				'DiscordBot (https://github.com/Dreamnity/styrocord.js, ' +
+				'DiscordBot (https://dreamnity.in/styrocord.js, ' +
 				version +
 				')',
 				'Content-Type':'application/json'
