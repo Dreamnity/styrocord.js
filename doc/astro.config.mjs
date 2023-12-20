@@ -35,9 +35,9 @@ export default defineConfig({
 			},
 			plugins: [
 				/*starlightDocSearch({
-					appId: 'YOUR_APP_ID',
-					apiKey: 'YOUR_SEARCH_API_KEY',
-					indexName: 'YOUR_INDEX_NAME',
+					appId: 'HASSPHII5K',
+					apiKey: 'edd3696c0cf83388a115eb621804b39c',
+					indexName: 'dreamnity',
 				}),*/
 			],
 		}),
