@@ -5,7 +5,7 @@
 	</p>
 	<br />
 	<p>
-		<a href="https://discord.dreamnity.in/"><img src="https://img.shields.io/discord/222078108977594368?color=5865F2&logo=discord&logoColor=white" alt="Discord server" /></a>
+		<a href="https://discord.dreamnity.in/"><img src="https://img.shields.io/discord/785358848591790121?color=5865F2&logo=discord&logoColor=white" alt="Discord server" /></a>
 		<a href="https://www.npmjs.com/package/styrocord.js"><img src="https://img.shields.io/npm/v/styrocord.js.svg?maxAge=3600" alt="npm version" /></a>
 		<a href="https://www.npmjs.com/package/styrocord.js"><img src="https://img.shields.io/npm/dt/styrocord.js.svg?maxAge=3600" alt="npm downloads" /></a>
 	</p>
