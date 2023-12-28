@@ -1,7 +1,7 @@
 <div align="center">
 	<br />
 	<p>
-		<a href="https://dreamnity.in/styrocord.js"><img src="https://raw.githubusercontent.com/Dreamnity/styrocord.js/main/icon.png" width="546" alt="styrocord.js" /></a>
+		<a href="https://dreamnity.in/styrocord.js"><img src="https://raw.githubusercontent.com/Dreamnity/styrocord.js/main/icon.png" width="200" alt="styrocord.js" /></a>
 	</p>
 	<br />
 	<p>
