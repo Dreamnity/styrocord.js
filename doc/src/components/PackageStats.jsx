@@ -194,7 +194,7 @@ const PackageStats = () => {
       >
         <div>
           <a href="https://github.com/dreamnity/styrocord.js">
-            <img alt="styrocord.js banner image" style={{ filter: "drop-shadow(0 0 3rem var(--overlay-blurple))" }}src="https://github.com/aoijs/website/raw/master/icon.png?raw=true" width="250" height="250" />
+            <img alt="styrocord.js banner image" style={{ filter: "drop-shadow(0 0 3rem var(--overlay-blurple))" }}src="https://github.com/dreamnity/styrocord.js/raw/master/icon.png?raw=true" width="250" height="250" />
           </a>
         </div>
         {lastFetchedTime && <p style={{ marginLeft: "5px", color: "var(--sl-color-gray-4)" }}>Last fetched: {lastFetchedTime}</p>}
