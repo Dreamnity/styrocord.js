@@ -345,7 +345,7 @@ function parse(patharray, options = {}) {
 	 * @param {Object} spec Discord API OpenAPI specification
 	 * @returns {Proxy}
 	 */
-	function createInteract(path = [],token = {}) {
+	function createInteract(path = [],token = '') {
 		let pth = path.join('/');
 		function send(options) {
 			let parsed = parse(path, options);
