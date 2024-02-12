@@ -86,10 +86,10 @@ bot.on("ready",async () => {
 	    console.log("Logged in as "+me.username+"!")
 	)
 });
-+ bot.on("messageCreate", async msg =>
++ bot.on("messageCreate", async msg =>{
 +     if(msg.content.startsWith('!ping'))
 + 	    return bot.channels[msg.channel.id].messages.create({content:'Pong!'})
-+ );
++ });
 ```
 5. Voila! now you have a working discord bot made with styrocord.js!
 ```diff lang="js"
@@ -105,9 +105,9 @@ bot.on("ready",async () => {
 	    console.log("Logged in as "+me.username+"!")
 	)
 });
-bot.on("messageCreate", async msg =>
+bot.on("messageCreate", async msg => {
     if(msg.content.startsWith('!ping'))
 	    return bot.channels[msg.channel.id].messages.create({content:'Pong!'})
-);
+});
 ```
 More documentations will come later.
