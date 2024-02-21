@@ -298,7 +298,7 @@ const methods = {
 function parse(patharray, options = {}) {
 	try {
 		let method = methods[patharray[patharray.length - 1].toLowerCase()];
-		if (method) patharray = patharray[0]==='/'?patharray.slice(0, -1):patharray;
+		if (method) patharray.pop();
 		let pa =
 			"/" +
 			patharray
