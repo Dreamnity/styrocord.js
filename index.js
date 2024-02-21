@@ -157,7 +157,7 @@ class Styrocord extends EventEmitter {
 			}
 			this.#lastevent = data.s || this.#lastevent;
 		});
-		let cleanupFn = () => clearTimeout(timeout);
+		let cleanupFn = () => clearTimeout(this.#hbtimeout);
 		this.on("close", cleanupFn);
 		let int = setInterval(() => { }, 100000);
 		this.on("close", () => clearInterval(int));
