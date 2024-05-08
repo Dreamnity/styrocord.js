@@ -7,5 +7,6 @@ doc/
 .gitpod.yml
 minified.js
 minifier.js
+ws.js
 test.js
 icon.png

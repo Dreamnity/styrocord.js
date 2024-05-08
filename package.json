@@ -1,6 +1,6 @@
 {
 	"name": "styrocord.js",
-	"version": "1.1.4",
+	"version": "1.2.0",
 	"description": "Discord.js but as light as a styrofoam",
 	"type": "commonjs",
 	"main": "index.js",
